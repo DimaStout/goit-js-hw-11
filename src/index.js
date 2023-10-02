@@ -128,7 +128,7 @@ async function renderGalleryInterface(event) {
 
 async function pagination() {
   currentPage += 1;
-  limit = 40;
+  let limit = 40;
 
   const dataImg = await fetchImages(searchQuery, currentPage);
 
