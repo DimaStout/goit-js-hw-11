@@ -10,8 +10,9 @@ refs.form.addEventListener('submit', renderGalleryInterface);
 refs.loadMoreBtn.addEventListener('click', pagination);
 
 const lightbox = new SimpleLightbox('.gallery a');
-lightbox.refresh();
+// lightbox.refresh();
 let perPage = 40;
+let currentPage = 0;
 
 async function renderGalleryInterface(event) {
   event.preventDefault();
@@ -32,6 +33,7 @@ async function renderGalleryInterface(event) {
     }
 
     renderImages(data.hits);
+    lightbox.refresh();
     totalPages = Math.ceil(data.totalHits / perPage);
 
     if (totalPages > 1) {
@@ -40,7 +42,6 @@ async function renderGalleryInterface(event) {
       refs.loadMoreBtn.classList.add('is-hidden');
     }
 
-    lightbox.refresh();
     Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
   } catch (error) {
     console.error(error);
@@ -50,7 +51,6 @@ async function renderGalleryInterface(event) {
 
 async function pagination() {
   currentPage += 1;
-  lightbox.refresh();
 
   const dataImg = await fetchImages(searchQuery, currentPage);
 
@@ -65,5 +65,21 @@ async function pagination() {
       "We're sorry, but you've reached the end of search results."
     );
   }
-  await renderMoreImages(dataImg, currentPage);
+  // renderMoreImages(dataImg, currentPage);
+  try {
+    const data = await fetchImages(searchQuery, currentPage);
+
+    if (data.totalHits === 0) {
+      Notiflix.Notify.warning('Sorry, no images were found for your request');
+      return;
+    }
+
+    renderImages(data.hits);
+    // const lightbox = new SimpleLightbox('.gallery a');
+    // lightbox.refresh();
+  } catch (error) {
+    console.error(error);
+    Notiflix.Notify.failure('Oops! Something went wrong.');
+  }
+  lightbox.refresh();
 }
