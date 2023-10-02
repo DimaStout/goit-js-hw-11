@@ -52,7 +52,6 @@ async function pagination() {
   currentPage += 1;
   const searchQuery = refs.input.value;
   const dataImg = await fetchImages(searchQuery, currentPage);
-
   const totalPages = Math.ceil(dataImg.totalHits / perPage);
 
   if (currentPage === totalPages) {
