@@ -3,14 +3,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import * as Notiflix from 'notiflix';
 import { refs } from './js/refs';
 import { fetchImages } from './js/axios';
-import { renderMoreImages } from './js/renderMoreImeges';
 import { renderImages } from './js/renderImeges';
 
 refs.form.addEventListener('submit', renderGalleryInterface);
 refs.loadMoreBtn.addEventListener('click', pagination);
 
 const lightbox = new SimpleLightbox('.gallery a');
-// lightbox.refresh();
 let perPage = 40;
 let currentPage = 0;
 
@@ -68,7 +66,7 @@ async function pagination() {
       "We're sorry, but you've reached the end of search results."
     );
   }
-  // renderMoreImages(dataImg, currentPage);
+  
   try {
     const data = await fetchImages(searchQuery, currentPage);
 
@@ -78,9 +76,7 @@ async function pagination() {
     }
 
     renderImages(data.hits);
-    // const lightbox = new SimpleLightbox('.gallery a');
-    // lightbox.refresh();
-  } catch (error) {
+    catch (error) {
     console.error(error);
     Notiflix.Notify.failure('Oops! Something went wrong.');
   }

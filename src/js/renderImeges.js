@@ -34,7 +34,4 @@ export function renderImages(images) {
     )
     .join(' ');
   refs.gallery.insertAdjacentHTML('beforeend', markup);
-
-  // const lightbox = new SimpleLightbox('.gallery a');
-  // lightbox.refresh();
 }
