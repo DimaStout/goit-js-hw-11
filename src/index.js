@@ -10,7 +10,7 @@ refs.form.addEventListener('submit', renderGalleryInterface);
 refs.loadMoreBtn.addEventListener('click', pagination);
 
 const lightbox = new SimpleLightbox('.gallery a');
-
+lightbox.refresh();
 let perPage = 40;
 
 async function renderGalleryInterface(event) {
@@ -50,6 +50,7 @@ async function renderGalleryInterface(event) {
 
 async function pagination() {
   currentPage += 1;
+  lightbox.refresh();
 
   const dataImg = await fetchImages(searchQuery, currentPage);
 

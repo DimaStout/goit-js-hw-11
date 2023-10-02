@@ -1,4 +1,6 @@
 import { refs } from './refs';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 export function renderImages(images) {
   const markup = images
     .map(
@@ -31,5 +33,8 @@ export function renderImages(images) {
       </div>`
     )
     .join(' ');
-  refs.gallery.innerHTML = markup;
+  refs.gallery.insertAdjacentHTML('beforeend', markup);
+
+  const lightbox = new SimpleLightbox('.gallery a');
+  lightbox.refresh();
 }
