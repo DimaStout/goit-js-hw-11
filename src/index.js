@@ -18,6 +18,7 @@ async function renderGalleryInterface(event) {
   event.preventDefault();
   currentPage = 1;
   const searchQuery = event.target.searchQuery.value.trim();
+  refs.gallery.innerHTML = '';
 
   if (!searchQuery) {
     Notiflix.Notify.failure('Please, enter some words');
