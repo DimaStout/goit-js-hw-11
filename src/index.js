@@ -34,7 +34,7 @@ async function renderGalleryInterface(event) {
 
     renderImages(data.hits);
     lightbox.refresh();
-    totalPages = Math.ceil(data.totalHits / perPage);
+    const totalPages = Math.ceil(data.totalHits / perPage);
 
     if (totalPages > 1) {
       refs.loadMoreBtn.classList.remove('is-hidden');
