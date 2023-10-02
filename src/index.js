@@ -8,6 +8,7 @@ const API_KEY = '39775256-103811d0d2e2705907a87b65c';
 const perPage = 40;
 let currentPage = 1;
 let totalPages;
+let searchQuery = '';
 
 const refs = {
   form: document.querySelector('#search-form'),
@@ -18,10 +19,12 @@ const refs = {
 refs.form.addEventListener('submit', renderGalleryInterface);
 refs.loadMoreBtn.addEventListener('click', pagination);
 
-async function fetchImages(searchRequest) {
+const lightbox = new SimpleLightbox('.gallery a');
+
+async function fetchImages(searchRequest, page) {
   try {
     const response = await axios.get(
-      `https://pixabay.com/api/?key=${API_KEY}&q=${searchRequest}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${perPage}&page=${currentPage}`
+      `https://pixabay.com/api/?key=${API_KEY}&q=${searchRequest}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${perPage}&page=${page}`
     );
 
     if (!response || !response.data || !response.data.hits) {
@@ -71,79 +74,52 @@ function renderImages(images) {
   refs.gallery.innerHTML = markup;
 }
 
-function renderMoreImages(moreImages) {
-  const markup = moreImages
-    .map(
-      ({
-        likes,
-        webformatURL,
-        largeImageURL,
-        tags,
-        views,
-        comments,
-        downloads,
-      }) => `<div class="photo-card">
-        <a href="${largeImageURL}" class="lightbox-trigger">
-          <img src="${webformatURL}" alt="${tags}" loading="lazy" />
-        </a>
-        <div class="info">
-          <p class="info-item">
-            <b>Likes</b> ${likes}
-          </p>
-          <p class="info-item">
-            <b>Views</b> ${views}
-          </p>
-          <p class="info-item">
-            <b>Comments</b> ${comments}
-          </p>
-          <p class="info-item">
-            <b>Downloads</b> ${downloads}
-          </p>
-        </div>
-      </div>`
-    )
-    .join(' ');
-  refs.gallery.insertAdjacentHTML('beforeend', markup);
-}
-
-function paginationInit(data) {
-  totalPages = Math.ceil(data.totalHits / perPage);
-  if (totalPages > 1) {
-    refs.loadMoreBtn.classList.remove('is-hidden');
-  } else {
-    refs.loadMoreBtn.classList.add('is-hidden');
-  }
-  return totalPages;
-}
-
-function initLightBox() {
-  const lightbox = new SimpleLightbox('.lightbox-trigger');
-}
-
-function resetLightBox() {
-  const lightboxElement = document.querySelector('.gallery');
-  lightboxElement.innerHTML = '';
-  initLightBox();
-}
-
-async function renderGalleryInterface(event) {
-  event.preventDefault();
-  refs.loadMoreBtn.classList.add('is-hidden');
-  const searchRequest = event.target.searchQuery.value.trim();
-  if (!searchRequest) {
-    Notiflix.Notify.failure('Please, enter some words');
-    return;
-  }
+async function renderMoreImages() {
   try {
-    const data = await fetchImages(searchRequest);
+    const data = await fetchImages(searchQuery, currentPage);
+
     if (data.totalHits === 0) {
       Notiflix.Notify.warning('Sorry, no images were found for your request');
       return;
     }
+
     renderImages(data.hits);
-    initLightBox();
+    lightbox.refresh();
+  } catch (error) {
+    console.error(error);
+    Notiflix.Notify.failure('Oops! Something went wrong.');
+  }
+}
+
+async function renderGalleryInterface(event) {
+  event.preventDefault();
+  currentPage = 1;
+  searchQuery = event.target.searchQuery.value.trim();
+
+  if (!searchQuery) {
+    Notiflix.Notify.failure('Please, enter some words');
+    return;
+  }
+
+  try {
+    const data = await fetchImages(searchQuery, currentPage);
+
+    if (data.totalHits === 0) {
+      Notiflix.Notify.warning('Sorry, no images were found for your request');
+      return;
+    }
+
+    renderImages(data.hits);
+    totalPages = Math.ceil(data.totalHits / perPage);
+
+    if (totalPages > 1) {
+      refs.loadMoreBtn.classList.remove('is-hidden');
+    } else {
+      refs.loadMoreBtn.classList.add('is-hidden');
+    }
+
+    lightbox.refresh();
     Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
-    paginationInit(data);
   } catch (error) {
     console.error(error);
     Notiflix.Notify.failure('Oops! Something went wrong.');
@@ -151,36 +127,21 @@ async function renderGalleryInterface(event) {
 }
 
 async function pagination() {
-  const searchRequest = refs.form.elements.searchQuery.value;
+  currentPage += 1;
+  limit = 40;
 
-  if (currentPage >= totalPages) {
+  const dataImg = await fetchImages(searchQuery, currentPage);
+
+  if (currentPage === totalPages) {
     refs.loadMoreBtn.classList.add('is-hidden');
     Notiflix.Notify.info('All images loaded!');
-    return;
   }
 
-  currentPage += 1;
-  try {
-    const response = await fetchImages(searchRequest);
-
-    if (!response || !response.data || !response.data.hits) {
-      // Handle the case where 'hits' is not available in the response
-      Notiflix.Notify.info('No more images to load.');
-      refs.loadMoreBtn.classList.add('is-hidden');
-      return;
-    }
-
-    const { data } = response;
-    if (data.hits.length === 0) {
-      Notiflix.Notify.info('No more images to load.');
-      refs.loadMoreBtn.classList.add('is-hidden');
-      return;
-    }
-    renderMoreImages(data.hits);
-    totalPages = paginationInit(data);
-    resetLightBox();
-  } catch (error) {
-    console.error(error);
-    Notiflix.Notify.failure('Oops! Something went wrong.');
+  if (currentPage * limit === dataImg.totalHits) {
+    refs.loadMoreBtn.classList.add('is-hidden');
+    Notiflix.Notify.info(
+      "We're sorry, but you've reached the end of search results."
+    );
   }
+  await renderMoreImages(dataImg, currentPage);
 }
