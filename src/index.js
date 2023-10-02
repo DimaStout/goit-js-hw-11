@@ -54,7 +54,7 @@ async function pagination() {
   const searchQuery = refs.input.value;
   const dataImg = await fetchImages(searchQuery, currentPage);
 
-  const totalPages = Math.ceil(data.totalHits / perPage);
+  const totalPages = Math.ceil(dataImg.totalHits / perPage);
 
   if (currentPage === totalPages) {
     refs.loadMoreBtn.classList.add('is-hidden');
