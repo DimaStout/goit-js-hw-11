@@ -17,7 +17,7 @@ let currentPage = 0;
 async function renderGalleryInterface(event) {
   event.preventDefault();
   currentPage = 1;
-  searchQuery = event.target.searchQuery.value.trim();
+  const searchQuery = event.target.searchQuery.value.trim();
 
   if (!searchQuery) {
     Notiflix.Notify.failure('Please, enter some words');
