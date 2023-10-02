@@ -51,7 +51,7 @@ async function renderGalleryInterface(event) {
 
 async function pagination() {
   currentPage += 1;
-
+  const searchQuery = refs.input.value;
   const dataImg = await fetchImages(searchQuery, currentPage);
 
   if (currentPage === totalPages) {
