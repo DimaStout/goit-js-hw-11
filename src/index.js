@@ -49,35 +49,26 @@ async function renderGalleryInterface(event) {
 }
 
 async function pagination() {
-  currentPage += 1;
-  const searchQuery = refs.input.value;
-  const dataImg = await fetchImages(searchQuery, currentPage);
-  const totalPages = Math.ceil(dataImg.totalHits / perPage);
+  // currentPage += 1;
 
-  if (currentPage === totalPages) {
-    refs.loadMoreBtn.classList.add('is-hidden');
-    Notiflix.Notify.info('All images loaded!');
-  }
-
-  if (currentPage > totalPages) {
-    refs.loadMoreBtn.classList.add('is-hidden');
-    Notiflix.Notify.info(
-      "We're sorry, but you've reached the end of search results."
-    );
-  }
-  
   try {
-    const data = await fetchImages(searchQuery, currentPage);
+    const dataImg = await fetchImages(searchQuery, currentPage);
 
-    if (data.totalHits === 0) {
-      Notiflix.Notify.warning('Sorry, no images were found for your request');
-      return;
+    if (currentPage >= totalPages) {
+      refs.loadMoreBtn.classList.add('is-hidden');
+      Notiflix.Notify.info('All images loaded!');
     }
 
-    renderImages(data.hits);
-    catch (error) {
+    if (currentPage > totalPages) {
+      refs.loadMoreBtn.classList.add('is-hidden');
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }
+
+    await renderMoreImages(dataImg);
+  } catch (error) {
     console.error(error);
     Notiflix.Notify.failure('Oops! Something went wrong.');
   }
-  lightbox.refresh();
 }
