@@ -28,7 +28,6 @@ async function renderGalleryInterface(event) {
 
     if (data.totalHits === 0) {
       Notiflix.Notify.warning('Sorry, no images were found for your request');
-      return;
     }
 
     renderImages(data.hits);
@@ -49,10 +48,13 @@ async function renderGalleryInterface(event) {
 }
 
 async function pagination() {
-  // currentPage += 1;
+  currentPage += 1;
+  const searchQuery = refs.input.value;
 
   try {
     const dataImg = await fetchImages(searchQuery, currentPage);
+
+    const totalPages = Math.ceil(dataImg.totalHits / perPage);
 
     if (currentPage >= totalPages) {
       refs.loadMoreBtn.classList.add('is-hidden');
@@ -66,7 +68,13 @@ async function pagination() {
       );
     }
 
-    await renderMoreImages(dataImg);
+    if (dataImg.totalHits === 0) {
+      Notiflix.Notify.warning('Sorry, no images were found for your request');
+      return;
+    }
+
+    renderImages(dataImg.hits);
+    lightbox.refresh();
   } catch (error) {
     console.error(error);
     Notiflix.Notify.failure('Oops! Something went wrong.');
