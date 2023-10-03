@@ -28,6 +28,8 @@ async function renderGalleryInterface(event) {
 
     if (data.totalHits === 0) {
       Notiflix.Notify.warning('Sorry, no images were found for your request');
+      refs.loadMoreBtn.classList.add('is-hidden');
+      return;
     }
 
     renderImages(data.hits);
